@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Umbrella Corp. - Panel de Análisis Concurrente</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -20,6 +20,39 @@
     </header>
 
     <main class="dashboard">
+
+        <section class="widget widget-ingest">
+            <h2><span class="icon">🔬</span> Ingesta Manual Concurrente</h2>
+            <p>Introduce los datos para cada tipo y pulsa "Procesar Lote" para enviarlos todos a la vez.</p>
+
+            <form id="ingest-form" class="ingest-form">
+
+                <div class="form-group" data-tipo="genetico">
+                    <label for="id-genetico">ID Genético</label>
+                    <input type="text" id="id-genetico" value="GEN-001">
+                    <label for="payload-genetico">Payload (Datos)</label>
+                    <textarea id="payload-genetico" rows="3">AGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCT</textarea>
+                </div>
+
+                <div class="form-group" data-tipo="bioquimico">
+                    <label for="id-bioquimico">ID Bioquímico</label>
+                    <input type="text" id="id-bioquimico" value="BIO-001">
+                    <label for="payload-bioquimico">Payload (Datos)</label>
+                    <textarea id="payload-bioquimico" rows="3">{"compound": "Adenosina", "concentration_nM": 120.5, "target_api": "receptor_A2a"}</textarea>
+                </div>
+
+                <div class="form-group" data-tipo="fisico">
+                    <label for="id-fisico">ID Físico</label>
+                    <input type="text" id="id-fisico" value="PHY-001">
+                    <label for="payload-fisico">Payload (Datos)</label>
+                    <textarea id="payload-fisico" rows="3">{"sensor_id": "T-1000", "temp_celsius": 37.5, "pressure_psi": 14.7}</textarea>
+                </div>
+
+                <button type="submit" id="batch-ingest-button" class="submit-button">
+                    Procesar Lote Concurrente
+                </button>
+            </form>
+        </section>
 
         <section class="widget widget-alerts">
             <h2><span class="icon">🔔</span> Alertas en Tiempo Real</h2>
@@ -58,6 +91,6 @@
 
     </main>
 
-    <script src="../static/js/script.js"></script>
+    <script src="/static/js/script.js"></script>
 </body>
 </html>
