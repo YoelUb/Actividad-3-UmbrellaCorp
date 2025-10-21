@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umbrella Corp. - Panel de Análisis Concurrente</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <h1>Panel de Análisis de Datos Biológicos</h1>
+        </div>
+        <div class="status">
+            <span>Estado del Sistema:</span>
+            <span id="system-status" class="status-ok">ONLINE</span>
+        </div>
+    </header>
+
+    <main class="dashboard">
+
+        <section class="widget widget-alerts">
+            <h2><span class="icon">🔔</span> Alertas en Tiempo Real</h2>
+            <div id="alert-box" class="alert-list">
+                <p class="no-alerts">Esperando alertas...</p>
+                </div>
+        </section>
+
+        <section class="widget widget-chart">
+            <h2><span class="icon">📈</span> Latencia del Sistema (ms)</h2>
+            <div class="chart-container">
+                <canvas id="latencyChart"></canvas>
+            </div>
+        </section>
+
+        <section class="widget widget-table">
+            <h2><span class="icon">📋</span> Eventos Procesados Recientemente</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Evento</th>
+                            <th>Tipo de Dato</th>
+                            <th>Worker</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-table-body">
+                        <tr>
+                            <td colspan="4" class="no-data">Cargando eventos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="../static/js/script.js"></script>
+</body>
+</html>
