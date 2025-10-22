@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlmodel import SQLModel
-
+from . import models
 
 load_dotenv()
 Database_url = os.getenv("DATABASE_URL")

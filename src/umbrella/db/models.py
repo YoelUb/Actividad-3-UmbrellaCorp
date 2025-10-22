@@ -22,5 +22,5 @@ class Evento(SQLModel, table=True):
 
     status: str
 
-    created_at: datetime = Field(default_factory=get_madrid_time, nullable=False)
+    created_at: datetime.datetime = Field(default_factory=get_madrid_time, nullable=False)
 
