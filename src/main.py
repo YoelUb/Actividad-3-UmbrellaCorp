@@ -1,14 +1,12 @@
 from typing import List
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.future import select
 from starlette.responses import HTMLResponse
 from starlette.requests import Request
 from starlette.websockets import WebSocket, WebSocketDisconnect
-
 from .umbrella.core.SystemOrchestrator import SystemOrchestrator
 from .umbrella.db.database import lifespan, session_dep
 from .umbrella.db.models import Evento
@@ -16,6 +14,7 @@ from .umbrella.model.websockets_manager import manager
 from .umbrella.utils.MetricsMonitor import metrics_monitor
 
 app = FastAPI(lifespan=lifespan)
+
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -30,19 +29,19 @@ async def index(request: Request):
 @app.websocket("/ws/alerts")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
-    print("Cliente WebSocket connected")
+    print("WebSocket Client connected")
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        print("Cliente WebSocket disconnected")
+        print("WebSocket Client disconnected")
 
 
 # Latency
 @app.get("/api/metrics/latency")
 async def get_latency():
-    return metrics_monitor.get_last_latency()
+    return metrics_monitor.get_all_last_latencies()
 
 # DB
 @app.get("/api/events/recent", response_model=List[Evento])
@@ -57,6 +56,7 @@ class IngestData(BaseModel):
     id: str
     tipo: str
     payload: str
+    recipient_email: EmailStr
 
 
 @app.post("/api/ingest/manual")
@@ -68,3 +68,5 @@ async def ingest_manual(data: IngestData, session: session_dep):
     await orchestrator.handle_ingestion(data.dict())
 
     return {"status": "ok", "message": f"Data for {data.id} received and being processed."}
+
+

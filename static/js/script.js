@@ -1,8 +1,17 @@
-document.addEventListener("DOMContentLoaded", () => {
+ document.addEventListener("DOMContentLoaded", () => {
 
     const alertBox = document.getElementById('alert-box');
     const systemStatus = document.getElementById('system-status');
     const noAlertsMsg = document.querySelector('.no-alerts');
+
+    const emailInput = document.getElementById('report-email');
+    const emailError = document.getElementById('email-error');
+
+    function validateEmail(email) {
+        // Regex simple para validación de email
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
 
     /**
      * @param {string} title Título del error
@@ -22,28 +31,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const ctx = document.getElementById('latencyChart').getContext('2d');
+
     const latencyChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
-            datasets: [{
-                label: 'Latencia Media (ms)',
-                data: [],
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3
-            }]
+            datasets: [
+                {
+                    label: 'Genético (CPU-Bound)',
+                    data: [],
+                    borderColor: 'rgba(244, 67, 54, 1)', // Rojo
+                    backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                },
+                {
+                    label: 'Bioquímico (I/O-Bound)',
+                    data: [],
+                    borderColor: 'rgba(33, 150, 243, 1)', // Azul
+                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                },
+                {
+                    label: 'Físico (I/O-Bound)',
+                    data: [],
+                    borderColor: 'rgba(255, 152, 0, 1)', // Naranja
+                    backgroundColor: 'rgba(255, 152, 0, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                }
+            ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
-            scales: { /* ... */ }
+            maintainAspectRatio: false
+
         }
     });
 
-    // --- 2. CONEXIÓN AL WEBSOCKET DE ALERTAS ---
     const wsUrl = `ws://${window.location.host}/ws/alerts`;
 
     function connectWebSocket() {
@@ -89,8 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     connectWebSocket();
 
-
-
     async function updateLatencyChart() {
         try {
             const response = await fetch('/api/metrics/latency');
@@ -100,11 +127,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
             const chart = latencyChart.data;
-            chart.labels.push(data.time);
-            chart.datasets[0].data.push(data.latency);
+
+            // Usamos una etiqueta de tiempo común (ej. la de genetico)
+            chart.labels.push(data.genetico.time);
+
+            chart.datasets[0].data.push(data.genetico.latency);
+            chart.datasets[1].data.push(data.bioquimico.latency);
+            chart.datasets[2].data.push(data.fisico.latency);
+
+            // Limita el historial del gráfico
             if (chart.labels.length > 20) {
                 chart.labels.shift();
                 chart.datasets[0].data.shift();
+                chart.datasets[1].data.shift();
+                chart.datasets[2].data.shift();
             }
             latencyChart.update();
 
@@ -132,11 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             tableBody.innerHTML = '';
-            events.reverse().forEach(event => {
+            events.forEach(event => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${event.id}</td>
-                    <td>${event.type}</td>
+                    <td>${event.event_id}</td>
+                    <td>${event.tipo_dato}</td>
                     <td>${event.worker}</td>
                     <td>${event.status}</td>
                 `;
@@ -164,6 +200,16 @@ document.addEventListener("DOMContentLoaded", () => {
     ingestForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const email = emailInput.value;
+        if (!validateEmail(email)) {
+            emailError.textContent = "Por favor, introduce una dirección de email válida.";
+            emailError.style.display = "block";
+            emailInput.focus();
+            return;
+        } else {
+            emailError.style.display = "none";
+        }
+
         console.log("Iniciando envío de lote concurrente...");
         batchButton.disabled = true;
         batchButton.textContent = "Procesando...";
@@ -172,17 +218,20 @@ document.addEventListener("DOMContentLoaded", () => {
             {
                 id: document.getElementById('id-genetico').value,
                 tipo: 'genetico',
-                payload: document.getElementById('payload-genetico').value
+                payload: document.getElementById('payload-genetico').value,
+                recipient_email: email // <-- AÑADIDO
             },
             {
                 id: document.getElementById('id-bioquimico').value,
                 tipo: 'bioquimico',
-                payload: document.getElementById('payload-bioquimico').value
+                payload: document.getElementById('payload-bioquimico').value,
+                recipient_email: email // <-- AÑADIDO
             },
             {
                 id: document.getElementById('id-fisico').value,
                 tipo: 'fisico',
-                payload: document.getElementById('payload-fisico').value
+                payload: document.getElementById('payload-fisico').value,
+                recipient_email: email // <-- AÑADIDO
             }
         ];
 
@@ -196,16 +245,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             const responses = await Promise.all(promesasDeEnvio);
-
             let allOk = true;
             for (const res of responses) {
                 if (!res.ok) {
                     allOk = false;
-                    const errorData = await res.json().catch(() => ({}));
+                    const errorData = await res.json().catch(() => ({ detail: 'Error desconocido' }));
                     console.error(`Fallo en el lote: ${res.status}`, errorData);
                     showErrorAlert(
                         `FALLO EN LOTE (${res.status})`,
-                        `No se pudo procesar la petición. ${errorData.message || ''}`
+                        `No se pudo procesar la petición. ${errorData.detail || ''}`
                     );
                 }
             }

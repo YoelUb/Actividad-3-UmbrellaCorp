@@ -1,5 +1,5 @@
 # Archivo de secretos y variables de entorno
-.env
+src/.env
 
 # Entornos virtuales de Python
 .venv/

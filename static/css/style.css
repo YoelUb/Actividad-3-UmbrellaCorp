@@ -291,3 +291,49 @@ tbody tr:last-child td {
     background-color: var(--text-secondary);
     cursor: not-allowed;
 }
+
+.form-group-email {
+    grid-column: 1 / -1;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid #6a1b9a;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group-email label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.form-group-email input[type="email"] {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.form-group-email input[type="email"]:focus {
+    border-color: #6a1b9a;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(106, 27, 154, 0.2);
+}
+
+.email-error-msg {
+    color: var(--status-error);
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin: 0.25rem 0 0 0;
+    display: none;
+    padding: 0.25rem 0.5rem;
+    background-color: rgba(244, 67, 54, 0.1);
+    border-radius: 4px;
+}
