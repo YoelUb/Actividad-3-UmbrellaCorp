@@ -65,7 +65,7 @@ async def ingest_manual(data: IngestData, session: session_dep):
     orchestrator = SystemOrchestrator(session, manager)
 
 
-    await orchestrator.handle_ingestion(data.dict())
+    await orchestrator.handle_ingestion(data.model_dump())
 
     return {"status": "ok", "message": f"Data for {data.id} received and being processed."}
 

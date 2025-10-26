@@ -1,27 +1,18 @@
-# tests/conftest.py
 import asyncio
-import sys  # <-- AÑADIDO
-from pathlib import Path  # <-- AÑADIDO
+import sys
+from pathlib import Path
 from typing import AsyncGenerator
-
+import httpx
 import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 
-# --- INYECTAR EL PYTHONPATH ---
-# Esto es un "hack" para asegurar que Python encuentre la carpeta 'src'
-# sin importar cómo se ejecute pytest.
-# 1. Obtiene la ruta a este archivo (conftest.py)
-# 2. Sube un nivel (a la carpeta 'tests')
-# 3. Sube otro nivel (a la carpeta raíz del proyecto)
-# 4. Añade esa carpeta raíz a la lista de sitios donde Python busca módulos
+
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
-# --- FIN DEL HACK ---
 
-# Ahora SÍ podemos importar desde 'src'
 from src.main import app
 from src.umbrella.db.database import get_session
 from src.umbrella.db.models import Evento
@@ -52,7 +43,7 @@ async def test_app() -> AsyncGenerator[AsyncClient, None]:
 
     app.dependency_overrides[get_session] = override_get_session
 
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         yield client
 
     async with test_engine.begin() as conn:
