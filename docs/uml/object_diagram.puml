@@ -1,0 +1,41 @@
+@startuml
+skinparam object {
+AttributeIconSize 0
+}
+
+object manager {
+ : ConnectionManager;
+}
+object metrics_monitor {
+ : MetricsMonitor;
+}
+object ws1 {
+ : WebSocket;
+}
+object ws2 {
+ : WebSocket;
+}
+object orchestrator {
+ : SystemOrchestrator;
+}
+object db_session {
+ : AsyncSession;
+}
+
+
+manager o-- "ws1" ws1
+manager o-- "ws2" ws2
+
+orchestrator ..> manager : <<usa>>
+orchestrator ..> metrics_monitor : <<usa>>
+orchestrator ..> db_session : <<usa>>
+
+
+note right of manager: Instancia global
+note right of metrics_monitor: Instancia global
+note bottom of orchestrator
+ Creado por cada petición
+ a /api/ingest/manual
+end note
+
+@enduml

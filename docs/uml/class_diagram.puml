@@ -1,0 +1,97 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty_methods
+hide empty_attributes
+
+package "FastAPI App" {
+    class "main:app (FastAPI)" as App {
+        + / (GET)
+        + /ws/alerts (WebSocket)
+        + /api/metrics/latency (GET)
+        + /api/events/recent (GET)
+        + /api/ingest/manual (POST)
+    }
+    class IngestData <<(P, orchid)Pydantic>> {
+        + id: str
+        + tipo: str
+        + payload: str
+        + recipient_email: EmailStr
+    }
+    App ..> IngestData : <<uses>>
+}
+
+package "Core" {
+    class SystemOrchestrator {
+        - session: AsyncSession
+        - ws_manager: ConnectionManager
+        + handle_ingestion(ingest_data)
+        + save_event_to_db(...)
+        + broadcast_alert_and_email(...)
+    }
+}
+
+package "Processing Services" {
+    class GeneticoService <<Module>> {
+        {static} + process_data(payload): Dict
+    }
+    class BioquimicoService <<Module>> {
+        {static} + process_data(payload): Dict
+    }
+    class FisicoService <<Module>> {
+        {static} + process_data(payload): Dict
+    }
+}
+
+package "Utilities" {
+    class AlertService <<Module>> {
+        {static} + build_and_send_report(...)
+        {static} - _send_email_sync(...)
+    }
+    class MetricsMonitor <<Singleton>> {
+        + latency_data: Dict[str, Deque]
+        + record_latency(...)
+        + get_all_last_latencies(): Dict
+    }
+}
+
+package "Database" {
+    class "database.py" as DBSetup {
+        + engine: AsyncEngine
+        + get_session(): AsyncSession
+    }
+    class Evento <<(S, lightblue)SQLModel>> {
+        + id: int
+        + event_id: str
+        + tipo_dato: str
+        + worker: str
+        + status: str
+        + created_at: datetime
+    }
+}
+
+package "WebSockets" {
+    class ConnectionManager <<Singleton>> {
+        + active_connections: List[WebSocket]
+        + connect(ws)
+        + disconnect(ws)
+        + broadcast(message)
+    }
+}
+
+' --- Relaciones ---
+App ..> SystemOrchestrator : <<creates>>
+App ..> ConnectionManager : <<uses>> (global manager)
+App ..> MetricsMonitor : <<uses>> (global monitor)
+App ..> DBSetup : <<uses>> (session_dep)
+
+SystemOrchestrator ..> ConnectionManager : <<uses>>
+SystemOrchestrator ..> MetricsMonitor : <<uses>>
+SystemOrchestrator ..> AlertService : <<delegates>>
+SystemOrchestrator ..> Evento : <<creates>>
+SystemOrchestrator ..> GeneticoService
+SystemOrchestrator ..> BioquimicoService
+SystemOrchestrator ..> FisicoService
+
+AlertService ..> MetricsMonitor : <<queries>>
+AlertService ..> Evento : <<queries>>
+@enduml

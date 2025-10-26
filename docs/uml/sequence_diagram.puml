@@ -1,0 +1,51 @@
+@startuml
+actor User
+participant "FastAPI App" as App
+participant "SystemOrchestrator" as Orch
+participant "ThreadPool\n(Executor)" as Executor
+participant "GeneticoService" as GenService
+participant "MetricsMonitor" as Monitor
+participant "Database" as DB
+participant "ConnectionManager" as WSManager
+participant "AlertService" as Alerter
+participant "EmailThread\n(Executor)" as EmailExecutor
+participant "SMTP Server" as SMTP
+
+User -> App: POST /api/ingest/manual\n(tipo="genetico", email="...")
+App -> Orch: create(session, manager)
+App -> Orch: await handle_ingestion(data)
+activate Orch
+
+Orch -> Executor: loop.run_in_executor(GeneticoService.process_data)
+activate Executor
+Executor -> GenService: process_data(payload)
+activate GenService
+GenService --> Executor: return result
+deactivate GenService
+Executor --> Orch: await (returns result)
+deactivate Executor
+
+Orch -> Monitor: record_latency(...)
+Orch -> DB: await save_event_to_db(...) (COMMIT Evento)
+
+Orch -> WSManager: await broadcast(alert_data)
+
+Orch -> Alerter: await build_and_send_report(...)
+activate Alerter
+Alerter -> Monitor: get latency data
+Alerter -> DB: await execute(select Evento limit 5)
+Alerter -> Alerter: build_report_string()
+
+Alerter -> EmailExecutor: loop.run_in_executor(_send_email_sync)
+activate EmailExecutor
+EmailExecutor -> SMTP: login() & sendmail(msg)
+SMTP --> EmailExecutor: ok
+EmailExecutor --> Alerter: (sync complete)
+deactivate EmailExecutor
+Alerter --> Orch: (report sent)
+deactivate Alerter
+
+Orch --> App: return {"status": "ok", ...}
+deactivate Orch
+App --> User: 200 OK
+@enduml
