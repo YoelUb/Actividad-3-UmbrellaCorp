@@ -5,5 +5,8 @@ pip install asyncpg
 pip install greenlet
 pip install python-dotenv
 pip install websockets
+# Devs and test
 pip install pytest
 pip install httpx
+pip install pytest_asyncio
+pip install aiosqlite
