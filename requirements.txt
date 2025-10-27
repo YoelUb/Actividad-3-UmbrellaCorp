@@ -5,3 +5,5 @@ pip install asyncpg
 pip install greenlet
 pip install python-dotenv
 pip install websockets
+pip install pytest
+pip install httpx
