@@ -1,0 +1,7 @@
+pip install fastapi
+pip install "uvicorn[standard]"
+pip install sqlmodel
+pip install asyncpg
+pip install greenlet
+pip install python-dotenv
+pip install websockets
