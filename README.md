@@ -71,7 +71,7 @@ El panel de control frontend permite a los usuarios enviar lotes de estos tres t
 
 2.  **Crear y activar un entorno virtual:**
     ```bash
-    python -m venv .venv
+    python3 -m venv .venv
     source .venv/bin/activate  # En Windows: .\.venv\Scripts\activate
     ```
 
@@ -123,3 +123,8 @@ El conjunto de pruebas está configurado para usar una base de datos SQLite en m
 
 ```bash
 pytest
+```
+
+## Contacto
+
+Escribir un correo a "yurqubar@myuax.com" o "yoelurquijo13@gmail.com"
