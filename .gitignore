@@ -1,10 +1,12 @@
 # Archivo de secretos y variables de entorno
 src/.env
+.env  # <-- AÑADIDO: Ignorar el .env de la raíz
 
 # Entornos virtuales de Python
 .venv/
 venv/
 env/
+.venv-test/
 
 # Archivos de caché y compilados de Python
 __pycache__/
@@ -17,7 +19,6 @@ build/
 dist/
 *.egg-info/
 
-
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
@@ -28,3 +29,7 @@ db.sqlite3
 
 # Archivos de logs
 *.log
+
+# Carpetas de IDE
+.idea/
+.vscode/
