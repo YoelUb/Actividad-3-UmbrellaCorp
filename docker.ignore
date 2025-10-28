@@ -1,6 +1,10 @@
-.venv
-__pycache__
+.venv/
+.venv-test/
+pycache/
 *.pyc
-.idea
-.git
+.idea/
+.vscode/
+.git/
 .DS_Store
+.env
+env.example
