@@ -1,4 +1,4 @@
- document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
 
     const alertBox = document.getElementById('alert-box');
     const systemStatus = document.getElementById('system-status');
@@ -8,15 +8,10 @@
     const emailError = document.getElementById('email-error');
 
     function validateEmail(email) {
-        // Regex simple para validación de email
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
     }
 
-    /**
-     * @param {string} title Título del error
-     * @param {string} message Mensaje del error
-     */
     function showErrorAlert(title, message) {
         if (noAlertsMsg && noAlertsMsg.style.display !== 'none') {
             noAlertsMsg.style.display = 'none';
@@ -40,7 +35,7 @@
                 {
                     label: 'Genético (CPU-Bound)',
                     data: [],
-                    borderColor: 'rgba(244, 67, 54, 1)', // Rojo
+                    borderColor: 'rgba(244, 67, 54, 1)',
                     backgroundColor: 'rgba(244, 67, 54, 0.2)',
                     borderWidth: 2,
                     fill: true,
@@ -49,7 +44,7 @@
                 {
                     label: 'Bioquímico (I/O-Bound)',
                     data: [],
-                    borderColor: 'rgba(33, 150, 243, 1)', // Azul
+                    borderColor: 'rgba(33, 150, 243, 1)',
                     backgroundColor: 'rgba(33, 150, 243, 0.2)',
                     borderWidth: 2,
                     fill: true,
@@ -58,7 +53,7 @@
                 {
                     label: 'Físico (I/O-Bound)',
                     data: [],
-                    borderColor: 'rgba(255, 152, 0, 1)', // Naranja
+                    borderColor: 'rgba(255, 152, 0, 1)',
                     backgroundColor: 'rgba(255, 152, 0, 0.2)',
                     borderWidth: 2,
                     fill: true,
@@ -128,14 +123,12 @@
             const data = await response.json();
             const chart = latencyChart.data;
 
-            // Usamos una etiqueta de tiempo común (ej. la de genetico)
             chart.labels.push(data.genetico.time);
 
             chart.datasets[0].data.push(data.genetico.latency);
             chart.datasets[1].data.push(data.bioquimico.latency);
             chart.datasets[2].data.push(data.fisico.latency);
 
-            // Limita el historial del gráfico
             if (chart.labels.length > 20) {
                 chart.labels.shift();
                 chart.datasets[0].data.shift();
@@ -200,14 +193,31 @@
     ingestForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const payloadGenetico = document.getElementById('payload-genetico').value.trim();
+        const payloadBioquimico = document.getElementById('payload-bioquimico').value.trim();
+        const payloadFisico = document.getElementById('payload-fisico').value.trim();
+        let validationError = false;
+
+        if (!payloadGenetico || !payloadBioquimico || !payloadFisico) {
+            showErrorAlert(
+                "CAMPOS INCOMPLETOS",
+                "Todos los campos de 'Payload (Datos)' deben estar rellenos para procesar el lote."
+            );
+            validationError = true;
+        }
+
         const email = emailInput.value;
         if (!validateEmail(email)) {
             emailError.textContent = "Por favor, introduce una dirección de email válida.";
             emailError.style.display = "block";
             emailInput.focus();
-            return;
+            validationError = true;
         } else {
             emailError.style.display = "none";
+        }
+
+        if (validationError) {
+            return;
         }
 
         console.log("Iniciando envío de lote concurrente...");
@@ -218,20 +228,20 @@
             {
                 id: document.getElementById('id-genetico').value,
                 tipo: 'genetico',
-                payload: document.getElementById('payload-genetico').value,
-                recipient_email: email // <-- AÑADIDO
+                payload: payloadGenetico,
+                recipient_email: email
             },
             {
                 id: document.getElementById('id-bioquimico').value,
                 tipo: 'bioquimico',
-                payload: document.getElementById('payload-bioquimico').value,
-                recipient_email: email // <-- AÑADIDO
+                payload: payloadBioquimico,
+                recipient_email: email
             },
             {
                 id: document.getElementById('id-fisico').value,
                 tipo: 'fisico',
-                payload: document.getElementById('payload-fisico').value,
-                recipient_email: email // <-- AÑADIDO
+                payload: payloadFisico,
+                recipient_email: email
             }
         ];
 

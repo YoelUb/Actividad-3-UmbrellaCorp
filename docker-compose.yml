@@ -1,6 +1,20 @@
-version: '3.8'
-
 services:
+
+  app:
+    build: .
+    container_name: umbrella_fastapi_app
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./src:/app/src
+      - ./templates:/app/templates
+      - ./static:/app/static
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./.env
+    depends_on:
+      postgres-db:
+        condition: service_healthy
 
   postgres-db:
     image: postgres:15-alpine
@@ -14,6 +28,11 @@ services:
     volumes:
       - umbrella_postgres_data:/var/lib/postgresql/data
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   umbrella_postgres_data:

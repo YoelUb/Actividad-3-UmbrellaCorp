@@ -1,12 +1,14 @@
-pip install fastapi
-pip install "uvicorn[standard]"
-pip install sqlmodel
-pip install asyncpg
-pip install greenlet
-pip install python-dotenv
-pip install websockets
+fastapi
+uvicorn[standard]
+sqlmodel
+asyncpg
+greenlet
+python-dotenv
+websockets
+pydantic[email]
+jinja2
 # Devs and test
-pip install pytest
-pip install httpx
-pip install pytest_asyncio
-pip install aiosqlite
+pytest
+httpx
+pytest-asyncio
+aiosqlite
