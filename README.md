@@ -103,40 +103,19 @@ las alertas de procesamiento en tiempo real a través de WebSockets y monitoriza
 
 ## 🧪 Ejecutar Pruebas
 
-El conjunto de pruebas está configurado para usar una base de datos SQLite en memoria, por lo que no afectará a tu base
-de datos de desarrollo.
+El proyecto incluye pruebas para ambos, backend y frontend.
 
+### Pruebas del Backend (Pytest)
 
-1. **Abre una nueva terminal**
+Las pruebas del backend están configuradas para ejecutarse contra el contenedor de la base de datos que ya está en funcionamiento con `docker-compose`.
 
-    ¡IMPORTANTE! --> No detengas "docker-compose up"
+1.  **Abre una nueva terminal.**
+    ¡IMPORTANTE! --> No detengas `docker-compose up`. Los contenedores deben estar ejecutándose.
 
-
-2. **Crea y activa un entorno virtual local (solo para los test)**
-
- ```bash
-  python3 -m venv .venv-test
-  source .venv-test/bin/activate
-   ```
-
-3. **Instala las dependencias de desarrollo**
-
- ```bash
-  pip install -r requirements.txt
- ```
-
-4. **Ejecuta pytest**
-
-```bash
- pytest
-```
-
-5. **Desactiva el entorno de pruebas una vez acabado**
-
-```bash
- deactivate
-```
-
+2.  **Ejecuta este comando para los test de Backend**
+    ```bash
+    docker-compose exec app pytest -v
+    ```
 
 
 ## Contacto
